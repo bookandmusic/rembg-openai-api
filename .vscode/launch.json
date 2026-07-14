@@ -1,0 +1,67 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "API: uvicorn",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "U2NET_HOME": "${workspaceFolder}/models"
+      },
+      "jinja": true,
+      "justMyCode": true
+    },
+    {
+      "name": "API: uvicorn (no reload)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "U2NET_HOME": "${workspaceFolder}/models"
+      },
+      "justMyCode": true
+    },
+    {
+      "name": "pytest",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-v"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "U2NET_HOME": "${workspaceFolder}/models"
+      },
+      "justMyCode": true
+    },
+    {
+      "name": "models list",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "app.cli",
+      "args": ["list", "--dir", "${workspaceFolder}/models"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "U2NET_HOME": "${workspaceFolder}/models"
+      },
+      "justMyCode": true
+    }
+  ]
+}

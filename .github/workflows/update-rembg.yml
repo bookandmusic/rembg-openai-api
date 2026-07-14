@@ -1,0 +1,56 @@
+name: Update rembg
+
+on:
+  schedule:
+    # 每天 UTC 03:00
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Upgrade rembg in lockfile
+        run: uv lock --upgrade-package rembg
+
+      - name: Commit and push if changed
+        id: commit
+        run: |
+          if git diff --quiet uv.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "rembg already up to date"
+            exit 0
+          fi
+          REMBG_VERSION=$(python3 -c "
+          import re
+          text = open('uv.lock').read()
+          m = re.search(r'name = \"rembg\"\nversion = \"([^\"]+)\"', text)
+          if not m:
+              raise SystemExit('rembg version not found in uv.lock')
+          print(m.group(1))
+          ")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add uv.lock
+          git commit -m "chore(deps): bump rembg to ${REMBG_VERSION} in uv.lock"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "Bumped rembg to ${REMBG_VERSION}"
+
+  docker:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    uses: ./.github/workflows/docker.yml
+    permissions:
+      contents: read
+      packages: write
